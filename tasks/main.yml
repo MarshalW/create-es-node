@@ -9,7 +9,7 @@
     state: directory
 - name: Remove elasticsearch volume
   shell: |
-    docker volume rm -f {{es_data_volume_name}}
+    docker volume rm -f elasticsearch_{{es_data_volume_name}}
   when: es_remove_data==true
 - name: Set max_map_count
   become: yes
