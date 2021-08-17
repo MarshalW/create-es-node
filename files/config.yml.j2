@@ -1,0 +1,31 @@
+cluster.name: "{{cluster_name}}"
+node.name: {{inventory_hostname}}
+
+# https://github.com/elastic/elasticsearch/issues/40803
+# 这个bug导致下面的设置无效
+cluster.max_shards_per_node: 30000
+
+network.host: {{inventory_hostname}}
+
+##  安全相关
+# 打开用户认证/登录
+xpack.security.enabled: true
+# 允许使用api key
+xpack.security.authc.api_key.enabled: true
+
+
+xpack.monitoring.collection.enabled: true
+xpack.monitoring.elasticsearch.collection.enabled: false
+
+# logger.level: DEBUG
+
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.key: "/usr/share/elasticsearch/config/certificates/elasticsearch.key"
+xpack.security.http.ssl.certificate_authorities: "/usr/share/elasticsearch/config/certificates/ca.crt"
+xpack.security.http.ssl.certificate: "/usr/share/elasticsearch/config/certificates/elasticsearch.crt"
+
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: "certificate" 
+xpack.security.transport.ssl.key: "/usr/share/elasticsearch/config/certificates/elasticsearch.key"
+xpack.security.transport.ssl.certificate: "/usr/share/elasticsearch/config/certificates/elasticsearch.crt"
+xpack.security.transport.ssl.certificate_authorities: "/usr/share/elasticsearch/config/certificates/ca.crt"

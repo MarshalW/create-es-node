@@ -1,0 +1,45 @@
+---
+- name: Clear elasticserach home directory
+  file:
+    path: "{{es_home_dir}}"
+    state: absent
+- name: Create elasticserach home directory
+  file:
+    path: "{{es_home_dir}}"
+    state: directory
+- name: Remove elasticsearch volume
+  shell: |
+    docker volume rm -f {{es_data_volume_name}}
+  when: es_remove_data==true
+- name: Set max_map_count
+  become: yes
+  shell: |
+    File=/etc/sysctl.conf
+    if ! grep -q max_map_count "$File"; then
+      echo 'vm.max_map_count=262144' >>/etc/sysctl.conf
+      sysctl -p
+    fi
+- name: Copy docker-compose.yml to es
+  template:
+    src: "{{ role_path }}/files/docker-compose.yml.j2"
+    dest: "{{es_home_dir}}/docker-compose.yml"
+- name: Copy config.yml to es
+  template:
+    src: "{{ role_path }}/files/config.yml.j2"
+    dest: "{{es_home_dir}}/config.yml"
+- name: Create elasticsearch certs directory
+  file:
+    path: "{{es_home_dir}}/certs"
+    state: directory
+- name: Copy ca.crt
+  copy:
+    src: ./certs/ca/ca.crt
+    dest: "{{es_home_dir}}/certs"
+- name: Copy elasticsearch.crt
+  copy:
+    src: ./certs/{{inventory_hostname}}/{{inventory_hostname}}.crt
+    dest: "{{es_home_dir}}/certs/elasticsearch.crt"
+- name: Copy elasticsearch.key
+  copy:
+    src: ./certs/{{inventory_hostname}}/{{inventory_hostname}}.key
+    dest: "{{es_home_dir}}/certs/elasticsearch.key"

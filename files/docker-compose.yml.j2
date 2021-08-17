@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  elasticsearch:
+    image: elasticsearch:{{es_version}}
+    container_name: elasticsearch
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      TAKE_FILE_OWNERSHIP: "true"
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: "-Xms{{heap_size}} -Xmx{{heap_size}}"
+      ELASTIC_PASSWORD: "{{es_password}}"
+{% if ((ansible_play_hosts | length)|int == 1) %}
+      discovery.type: single-node
+{% else %}
+      discovery.seed_hosts: "{{seed_hosts}}"
+      cluster.initial_master_nodes: "{{master_nodes}}"
+{% endif %}
+    # ports:
+    #   - 9200:9200
+    #   - 9300:9300
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65535
+        hard: 65535
+    volumes:
+      - ./config.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./certs:/usr/share/elasticsearch/config/certificates
+      - {{es_data_volume_name}}:/usr/share/elasticsearch/data
+volumes:
+  {{es_data_volume_name}}:
